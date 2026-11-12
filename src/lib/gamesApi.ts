@@ -66,6 +66,12 @@ export async function toggleLike(
   return { liked: result.liked }
 }
 
+export async function getLikeCount(gameId: string): Promise<number> {
+  if (usingRemoteData()) return remoteLikes.fetchLikeCount(gameId)
+  const game = getMockGameById(gameId)
+  return game?.likeCount ?? 0
+}
+
 export function hasLikedLocal(gameId: string, visitorId: string): boolean {
   if (usingRemoteData()) return false
   return visitorHasLikedMock(gameId, visitorId)

@@ -33,16 +33,9 @@ export function useGame(id: string | undefined) {
 
   useEffect(() => {
     if (!id) return
-    return subscribeLikeCount((gameId, delta) => {
+    return subscribeLikeCount((gameId, likeCount) => {
       if (gameId !== id) return
-      setGame((prev) =>
-        prev
-          ? {
-              ...prev,
-              likeCount: Math.max(0, prev.likeCount + delta),
-            }
-          : prev,
-      )
+      setGame((prev) => (prev ? { ...prev, likeCount } : prev))
     })
   }, [id, subscribeLikeCount])
 

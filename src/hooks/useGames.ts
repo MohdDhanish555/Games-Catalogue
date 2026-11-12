@@ -47,15 +47,10 @@ export function useGames() {
   }, [refresh])
 
   useEffect(() => {
-    return subscribeLikeCount((gameId, delta) => {
+    return subscribeLikeCount((gameId, likeCount) => {
       setGames((prev) =>
         prev.map((game) =>
-          game.id === gameId
-            ? {
-                ...game,
-                likeCount: Math.max(0, game.likeCount + delta),
-              }
-            : game,
+          game.id === gameId ? { ...game, likeCount } : game,
         ),
       )
     })

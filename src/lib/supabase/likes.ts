@@ -38,3 +38,14 @@ export async function unlikeGame(
 
   if (error) throw error
 }
+
+export async function fetchLikeCount(gameId: string): Promise<number> {
+  const supabase = getSupabase()
+  const { count, error } = await supabase
+    .from('game_likes')
+    .select('*', { count: 'exact', head: true })
+    .eq('game_id', gameId)
+
+  if (error) throw error
+  return count ?? 0
+}

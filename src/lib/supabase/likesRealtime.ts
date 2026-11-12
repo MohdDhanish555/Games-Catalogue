@@ -3,31 +3,28 @@ import { getSupabase, isSupabaseConfigured } from './client'
 
 export type GameLikeChange = {
   gameId: string
-  visitorId: string
-  delta: 1 | -1
+  visitorId: string | null
 }
 
 type LikeRow = {
-  game_id: string
-  visitor_id: string
+  game_id?: string
+  visitor_id?: string
 }
 
 function parseChange(
   payload: RealtimePostgresChangesPayload<LikeRow>,
 ): GameLikeChange | null {
-  if (payload.eventType === 'INSERT' && payload.new) {
-    const row = payload.new as LikeRow
-    if (!row.game_id || !row.visitor_id) return null
-    return { gameId: row.game_id, visitorId: row.visitor_id, delta: 1 }
-  }
+  const row =
+    payload.eventType === 'DELETE'
+      ? (payload.old as LikeRow | null)
+      : (payload.new as LikeRow | null)
 
-  if (payload.eventType === 'DELETE' && payload.old) {
-    const row = payload.old as LikeRow
-    if (!row.game_id || !row.visitor_id) return null
-    return { gameId: row.game_id, visitorId: row.visitor_id, delta: -1 }
-  }
+  if (!row?.game_id) return null
 
-  return null
+  return {
+    gameId: row.game_id,
+    visitorId: row.visitor_id ?? null,
+  }
 }
 
 export function subscribeToGameLikes(

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { getLikedIds, toggleLike } from '@/lib/gamesApi'
+import { getLikeCount, getLikedIds, toggleLike } from '@/lib/gamesApi'
 import { useVisitorId } from '@/hooks/useVisitorId'
 import { subscribeToGameLikes } from '@/lib/supabase/likesRealtime'
 
-export type LikeCountListener = (gameId: string, delta: number) => void
+export type LikeCountListener = (gameId: string, likeCount: number) => void
+
+const REFETCH_DEBOUNCE_MS = 80
 
 export function useLikes() {
   const visitorId = useVisitorId()
@@ -11,7 +13,36 @@ export function useLikes() {
   const [ready, setReady] = useState(false)
   const listenersRef = useRef(new Set<LikeCountListener>())
   const visitorIdRef = useRef(visitorId)
+  const pendingRefetchRef = useRef(new Map<string, ReturnType<typeof setTimeout>>())
   visitorIdRef.current = visitorId
+
+  const notifyLikeCount = useCallback((gameId: string, likeCount: number) => {
+    listenersRef.current.forEach((listener) => {
+      listener(gameId, likeCount)
+    })
+  }, [])
+
+  const scheduleLikeCountRefetch = useCallback(
+    (gameId: string) => {
+      const existing = pendingRefetchRef.current.get(gameId)
+      if (existing) clearTimeout(existing)
+
+      const timeout = setTimeout(() => {
+        pendingRefetchRef.current.delete(gameId)
+        void (async () => {
+          try {
+            const likeCount = await getLikeCount(gameId)
+            notifyLikeCount(gameId, likeCount)
+          } catch {
+            // Keep current UI count if refetch fails.
+          }
+        })()
+      }, REFETCH_DEBOUNCE_MS)
+
+      pendingRefetchRef.current.set(gameId, timeout)
+    },
+    [notifyLikeCount],
+  )
 
   useEffect(() => {
     if (!visitorId) return
@@ -30,13 +61,23 @@ export function useLikes() {
   }, [visitorId])
 
   useEffect(() => {
-    return subscribeToGameLikes((change) => {
-      if (change.visitorId === visitorIdRef.current) return
-      listenersRef.current.forEach((listener) => {
-        listener(change.gameId, change.delta)
-      })
+    const unsubscribe = subscribeToGameLikes((change) => {
+      // Own toggles already update optimistically; skip to avoid a race.
+      if (
+        change.visitorId &&
+        change.visitorId === visitorIdRef.current
+      ) {
+        return
+      }
+      scheduleLikeCountRefetch(change.gameId)
     })
-  }, [])
+
+    return () => {
+      unsubscribe()
+      pendingRefetchRef.current.forEach((timeout) => clearTimeout(timeout))
+      pendingRefetchRef.current.clear()
+    }
+  }, [scheduleLikeCountRefetch])
 
   const subscribeLikeCount = useCallback((listener: LikeCountListener) => {
     listenersRef.current.add(listener)
