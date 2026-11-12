@@ -33,7 +33,7 @@ export function CatalogueBrowseFilters({
   return (
     <div className="space-y-4">
       <div
-        className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex w-full gap-2"
         role="tablist"
         aria-label="Browse catalogue"
       >
@@ -47,7 +47,7 @@ export function CatalogueBrowseFilters({
               aria-selected={active}
               onClick={() => onBrowseModeChange(tab.id)}
               className={cn(
-                'shrink-0 rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                'flex-1 rounded-md px-2 py-2 text-center text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:flex-none sm:px-4',
                 active
                   ? 'bg-ink text-paper'
                   : 'bg-transparent text-muted hover:bg-ink/5 hover:text-ink',

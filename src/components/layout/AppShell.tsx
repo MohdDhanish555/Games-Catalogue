@@ -1,26 +1,26 @@
-import type { ReactNode } from 'react'
-import { Heart } from 'lucide-react'
+import type { ReactNode } from "react";
+import { Heart } from "lucide-react";
 
 interface AppShellProps {
-  header: ReactNode
-  children: ReactNode
+  header: ReactNode;
+  children: ReactNode;
 }
 
-const COPYRIGHT_YEAR = new Date().getFullYear()
+const COPYRIGHT_YEAR = new Date().getFullYear();
 
 export function AppShell({ header, children }: AppShellProps) {
   return (
     <div className="flex min-h-dvh flex-col">
       {header}
-      <main className="flex-1">{children}</main>
-      <footer className="border-t border-line/80">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-md space-y-1">
-              <p className="font-display text-base text-ink">Family Games</p>
+      <main className="flex-1 pb-4 sm:pb-6">{children}</main>
+      <footer className="mt-8 border-t border-line bg-surface sm:mt-12">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:gap-5 sm:px-6 sm:py-12 lg:px-8">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
+            <div className="max-w-md space-y-2">
+              <p className="font-display text-lg text-ink">Family Games</p>
               <p className="text-sm leading-relaxed text-muted">
-                A living collection of games we play together — shared so every
-                gathering can start with something familiar, fun, and ours.
+                A shared collection of games we play together - for familiar,
+                fun gatherings.
               </p>
             </div>
             <p className="inline-flex items-center gap-1.5 text-sm text-muted">
@@ -31,11 +31,13 @@ export function AppShell({ header, children }: AppShellProps) {
               </span>
             </p>
           </div>
-          <p className="text-xs tracking-[0.06em] text-muted/80">
-            © {COPYRIGHT_YEAR} Ibrahim · Alimamma Family Collection
-          </p>
+          <div className="border-t border-line pt-4">
+            <p className="text-xs tracking-[0.06em] text-muted/80">
+              © {COPYRIGHT_YEAR} Ibrahim · Alimamma Family Collection
+            </p>
+          </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }

@@ -1,12 +1,13 @@
+import { ArrowDownWideNarrow } from 'lucide-react'
 import { AppShell } from '@/components/layout/AppShell'
 import { Header } from '@/components/layout/Header'
 import { CatalogueSkeleton } from '@/components/games/CatalogueSkeleton'
 import { CatalogueBrowseFilters } from '@/components/games/CatalogueBrowseFilters'
 import { FeaturedGame } from '@/components/games/FeaturedGame'
 import { GameCatalogue } from '@/components/games/GameCatalogue'
-import { SortControls } from '@/components/games/SortControls'
 import { useGames } from '@/hooks/useGames'
 import { useLikesContext } from '@/context/LikesContext'
+import { cn } from '@/lib/utils'
 import type { Game } from '@/types/game'
 
 export function HomePage() {
@@ -56,7 +57,7 @@ export function HomePage() {
         />
       }
     >
-      <div className="mx-auto w-full max-w-6xl space-y-10 px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <div className="mx-auto w-full max-w-6xl space-y-10 px-4 py-8 pb-12 sm:px-6 sm:pb-14 lg:px-8 lg:py-12 lg:pb-16">
         {loading ? <CatalogueSkeleton /> : null}
 
         {!loading && error ? (
@@ -86,28 +87,50 @@ export function HomePage() {
             )}
 
             <section className="space-y-6">
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0 flex-1">
-                  <CatalogueBrowseFilters
-                    browseMode={filters.browseMode}
-                    ageGroup={filters.ageGroup}
-                    playFormat={filters.playFormat}
-                    onBrowseModeChange={setBrowseMode}
-                    onAgeGroupChange={setAgeGroup}
-                    onPlayFormatChange={setPlayFormat}
-                  />
-                </div>
-                <SortControls value={filters.sort} onChange={setSort} />
-              </div>
+              <CatalogueBrowseFilters
+                browseMode={filters.browseMode}
+                ageGroup={filters.ageGroup}
+                playFormat={filters.playFormat}
+                onBrowseModeChange={setBrowseMode}
+                onAgeGroupChange={setAgeGroup}
+                onPlayFormatChange={setPlayFormat}
+              />
 
               <div className="flex items-end justify-between gap-4 border-b border-line pb-3">
                 <h2 className="font-display text-2xl font-semibold leading-snug tracking-tight">
                   {catalogueHeading}
                 </h2>
-                <p className="text-sm text-muted">
-                  {filtered.length}{' '}
-                  {filtered.length === 1 ? 'game' : 'games'}
-                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-sm text-muted">
+                    {filtered.length}{' '}
+                    {filtered.length === 1 ? 'game' : 'games'}
+                  </p>
+                  <button
+                    type="button"
+                    aria-pressed={filters.sort === 'liked'}
+                    aria-label={
+                      filters.sort === 'liked'
+                        ? 'Sorted by most liked. Click to sort by recently added'
+                        : 'Sort by most liked'
+                    }
+                    title={
+                      filters.sort === 'liked'
+                        ? 'Most liked'
+                        : 'Sort by most liked'
+                    }
+                    onClick={() =>
+                      setSort(filters.sort === 'liked' ? 'recent' : 'liked')
+                    }
+                    className={cn(
+                      'inline-flex size-9 items-center justify-center rounded-md border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                      filters.sort === 'liked'
+                        ? 'border-ink bg-ink text-paper'
+                        : 'border-line bg-surface text-muted hover:text-ink',
+                    )}
+                  >
+                    <ArrowDownWideNarrow className="size-4" aria-hidden />
+                  </button>
+                </div>
               </div>
 
               <GameCatalogue
