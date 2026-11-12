@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useLikesContext } from '@/context/LikesContext'
 import {
   filterAndSortGames,
   listGames,
@@ -22,6 +23,7 @@ const defaultFilters: GameFilters = {
 }
 
 export function useGames() {
+  const { subscribeLikeCount } = useLikesContext()
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -43,6 +45,21 @@ export function useGames() {
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  useEffect(() => {
+    return subscribeLikeCount((gameId, delta) => {
+      setGames((prev) =>
+        prev.map((game) =>
+          game.id === gameId
+            ? {
+                ...game,
+                likeCount: Math.max(0, game.likeCount + delta),
+              }
+            : game,
+        ),
+      )
+    })
+  }, [subscribeLikeCount])
 
   const filtered = useMemo(
     () => filterAndSortGames(games, filters),

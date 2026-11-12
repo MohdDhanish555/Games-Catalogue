@@ -1,11 +1,17 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { getLikedIds, toggleLike } from '@/lib/gamesApi'
 import { useVisitorId } from '@/hooks/useVisitorId'
+import { subscribeToGameLikes } from '@/lib/supabase/likesRealtime'
+
+export type LikeCountListener = (gameId: string, delta: number) => void
 
 export function useLikes() {
   const visitorId = useVisitorId()
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
   const [ready, setReady] = useState(false)
+  const listenersRef = useRef(new Set<LikeCountListener>())
+  const visitorIdRef = useRef(visitorId)
+  visitorIdRef.current = visitorId
 
   useEffect(() => {
     if (!visitorId) return
@@ -22,6 +28,22 @@ export function useLikes() {
       cancelled = true
     }
   }, [visitorId])
+
+  useEffect(() => {
+    return subscribeToGameLikes((change) => {
+      if (change.visitorId === visitorIdRef.current) return
+      listenersRef.current.forEach((listener) => {
+        listener(change.gameId, change.delta)
+      })
+    })
+  }, [])
+
+  const subscribeLikeCount = useCallback((listener: LikeCountListener) => {
+    listenersRef.current.add(listener)
+    return () => {
+      listenersRef.current.delete(listener)
+    }
+  }, [])
 
   const isLiked = useCallback(
     (gameId: string) => likedIds.has(gameId),
@@ -61,5 +83,12 @@ export function useLikes() {
     [likedIds, visitorId],
   )
 
-  return { visitorId, likedIds, isLiked, toggle, ready }
+  return {
+    visitorId,
+    likedIds,
+    isLiked,
+    toggle,
+    ready,
+    subscribeLikeCount,
+  }
 }

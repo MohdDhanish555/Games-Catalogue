@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useLikesContext } from '@/context/LikesContext'
 import { getGame } from '@/lib/gamesApi'
 import type { Game } from '@/types/game'
 
 export function useGame(id: string | undefined) {
+  const { subscribeLikeCount } = useLikesContext()
   const [game, setGame] = useState<Game | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -28,6 +30,21 @@ export function useGame(id: string | undefined) {
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  useEffect(() => {
+    if (!id) return
+    return subscribeLikeCount((gameId, delta) => {
+      if (gameId !== id) return
+      setGame((prev) =>
+        prev
+          ? {
+              ...prev,
+              likeCount: Math.max(0, prev.likeCount + delta),
+            }
+          : prev,
+      )
+    })
+  }, [id, subscribeLikeCount])
 
   const updateLocal = useCallback((patch: Partial<Game>) => {
     setGame((prev) => (prev ? { ...prev, ...patch } : prev))
