@@ -19,8 +19,8 @@ export function AppShell({ header, children }: AppShellProps) {
             <div className="max-w-md space-y-2">
               <p className="font-display text-lg text-ink">Family Games</p>
               <p className="text-sm leading-relaxed text-muted">
-                A shared collection of games we play together - for familiar,
-                fun gatherings.
+                A shared collection of games we play together — for fun family
+                gatherings.
               </p>
             </div>
             <p className="inline-flex items-center gap-1.5 text-sm text-muted">
