@@ -23,6 +23,7 @@ create table if not exists public.games (
   instructions_en text not null default '',
   instructions_kn text not null default '',
   visitor_id text,
+  like_count integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -60,15 +61,45 @@ execute function public.set_updated_at();
 create or replace view public.games_with_likes
 with (security_invoker = true)
 as
-select
-  g.*,
-  coalesce(l.like_count, 0)::int as like_count
-from public.games g
-left join (
-  select game_id, count(*)::int as like_count
-  from public.game_likes
-  group by game_id
-) l on l.game_id = g.id;
+select *
+from public.games;
+
+-- Keep like_count in sync (also applied via 005 for existing projects).
+create or replace function public.sync_game_like_count()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  target_game_id uuid;
+begin
+  if tg_op = 'DELETE' then
+    target_game_id := old.game_id;
+  else
+    target_game_id := new.game_id;
+  end if;
+
+  update public.games
+  set like_count = (
+    select count(*)::int
+    from public.game_likes
+    where game_id = target_game_id
+  )
+  where id = target_game_id;
+
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists game_likes_sync_count on public.game_likes;
+create trigger game_likes_sync_count
+after insert or delete on public.game_likes
+for each row
+execute function public.sync_game_like_count();
 
 grant select on public.games_with_likes to anon, authenticated;
 grant select, insert on public.games to anon, authenticated;

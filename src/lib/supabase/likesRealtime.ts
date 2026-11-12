@@ -1,50 +1,49 @@
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { getSupabase, isSupabaseConfigured } from './client'
 
-export type GameLikeChange = {
+export type GameLikeCountChange = {
   gameId: string
-  visitorId: string | null
+  likeCount: number
 }
 
-type LikeRow = {
-  game_id?: string
-  visitor_id?: string
+type GameLikeCountRow = {
+  id?: string
+  like_count?: number
 }
 
-function parseChange(
-  payload: RealtimePostgresChangesPayload<LikeRow>,
-): GameLikeChange | null {
-  const row =
-    payload.eventType === 'DELETE'
-      ? (payload.old as LikeRow | null)
-      : (payload.new as LikeRow | null)
+function parseLikeCountChange(
+  payload: RealtimePostgresChangesPayload<GameLikeCountRow>,
+): GameLikeCountChange | null {
+  if (payload.eventType !== 'UPDATE') return null
 
-  if (!row?.game_id) return null
+  const row = payload.new as GameLikeCountRow | null
+  if (!row?.id || typeof row.like_count !== 'number') return null
 
   return {
-    gameId: row.game_id,
-    visitorId: row.visitor_id ?? null,
+    gameId: row.id,
+    likeCount: Math.max(0, row.like_count),
   }
 }
 
-export function subscribeToGameLikes(
-  onChange: (change: GameLikeChange) => void,
+/** Subscribe to denormalized games.like_count updates (like + unlike). */
+export function subscribeToGameLikeCounts(
+  onChange: (change: GameLikeCountChange) => void,
 ): () => void {
   if (!isSupabaseConfigured) return () => {}
 
   const supabase = getSupabase()
   const channel = supabase
-    .channel('game-likes')
+    .channel('game-like-counts')
     .on(
       'postgres_changes',
       {
-        event: '*',
+        event: 'UPDATE',
         schema: 'public',
-        table: 'game_likes',
+        table: 'games',
       },
       (payload) => {
-        const change = parseChange(
-          payload as RealtimePostgresChangesPayload<LikeRow>,
+        const change = parseLikeCountChange(
+          payload as RealtimePostgresChangesPayload<GameLikeCountRow>,
         )
         if (change) onChange(change)
       },
