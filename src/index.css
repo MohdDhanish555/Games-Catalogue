@@ -2,7 +2,8 @@
 
 @theme {
   --font-display: 'Syne', system-ui, sans-serif;
-  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-sans: 'DM Sans', 'Noto Sans Kannada', system-ui, sans-serif;
+  --font-kannada: 'Noto Sans Kannada', 'DM Sans', system-ui, sans-serif;
 
   --color-paper: #f4f4f2;
   --color-ink: #121212;
@@ -66,6 +67,10 @@
 @layer utilities {
   .font-display {
     font-family: var(--font-display);
+  }
+
+  .font-kannada {
+    font-family: var(--font-kannada);
   }
 
   .text-balance {

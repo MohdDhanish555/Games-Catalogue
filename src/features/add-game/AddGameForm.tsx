@@ -309,7 +309,7 @@ export function AddGameForm({
             value={values.instructionsKn}
             onChange={(e) => update('instructionsKn', e.target.value)}
             placeholder="ಆಟದ ನಿಯಮಗಳನ್ನು ಕನ್ನಡದಲ್ಲಿ ಬರೆಯಿರಿ"
-            className="min-h-[140px]"
+            className="font-kannada min-h-[140px] text-[1.05rem] leading-[1.75]"
             lang="kn"
           />
         </Field>

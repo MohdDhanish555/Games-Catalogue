@@ -36,8 +36,11 @@ export function GameDetailPage() {
   )
   const hasEn = Boolean(game?.instructionsEn.trim())
   const hasKn = Boolean(game?.instructionsKn.trim())
-  const activeRules =
-    rulesLang === 'kn' ? game?.instructionsKn : game?.instructionsEn
+  const showKnRules =
+    (rulesLang === 'kn' && hasKn) || (rulesLang === 'en' && !hasEn && hasKn)
+  const activeRules = showKnRules
+    ? game?.instructionsKn
+    : game?.instructionsEn
 
   return (
     <AppShell header={<Header showSearch={false} />}>
@@ -105,12 +108,16 @@ export function GameDetailPage() {
                 </div>
 
                 <section className="space-y-4 border-t border-line pt-6">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <h2 className="font-display text-2xl font-semibold">
                       How to play
                     </h2>
                     {hasEn || hasKn ? (
-                      <div className="inline-flex rounded-md border border-line bg-surface p-1">
+                      <div
+                        className="flex w-full rounded-md border border-line bg-surface p-1 sm:w-auto sm:inline-flex"
+                        role="tablist"
+                        aria-label="Rules language"
+                      >
                         <LangTab
                           active={rulesLang === 'en'}
                           disabled={!hasEn}
@@ -122,19 +129,22 @@ export function GameDetailPage() {
                           disabled={!hasKn}
                           onClick={() => setRulesLang('kn')}
                           label="ಕನ್ನಡ"
+                          kannada
                         />
                       </div>
                     ) : null}
                   </div>
 
                   {hasEn || hasKn ? (
-                    <p className="whitespace-pre-wrap text-base leading-relaxed text-ink/90">
-                      {(rulesLang === 'kn' && hasKn) ||
-                      (rulesLang === 'en' && hasEn)
-                        ? activeRules
-                        : hasEn
-                          ? game.instructionsEn
-                          : game.instructionsKn}
+                    <p
+                      lang={showKnRules ? 'kn' : 'en'}
+                      className={cn(
+                        'whitespace-pre-wrap text-base leading-relaxed text-ink/90',
+                        showKnRules &&
+                          'font-kannada text-[1.05rem] leading-[1.75]',
+                      )}
+                    >
+                      {activeRules}
                     </p>
                   ) : (
                     <p className="text-sm text-muted">
@@ -182,20 +192,28 @@ function LangTab({
   disabled,
   onClick,
   label,
+  kannada = false,
 }: {
   active: boolean
   disabled: boolean
   onClick: () => void
   label: string
+  kannada?: boolean
 }) {
   return (
     <button
       type="button"
+      role="tab"
+      aria-selected={active}
+      lang={kannada ? 'kn' : undefined}
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'rounded-sm px-3 py-1.5 text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-40',
-        active ? 'bg-ink text-paper' : 'text-muted hover:text-ink',
+        'flex-1 rounded-sm px-3 py-2.5 text-center text-sm font-medium leading-none transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none sm:px-4 sm:py-1.5',
+        kannada && 'font-kannada',
+        active
+          ? 'bg-ink text-paper'
+          : 'bg-transparent text-ink/70 hover:bg-ink/5 hover:text-ink',
       )}
     >
       {label}
