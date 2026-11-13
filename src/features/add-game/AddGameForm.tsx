@@ -163,7 +163,8 @@ export function AddGameForm({
           ? await updateGame(initialGame.id, payload, initialGame.likeCount)
           : await createGame(payload)
 
-      navigate(`/games/${game.id}`)
+      // Replace /add or /edit so "Back to catalogue" (history -1) skips the form.
+      navigate(`/games/${game.id}`, { replace: true })
     } catch (err) {
       setFormError(
         err instanceof Error
