@@ -1,19 +1,24 @@
-import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { AppShell } from '@/components/layout/AppShell'
 import { Header } from '@/components/layout/Header'
 import { Button } from '@/components/ui/button'
 import { AddGameForm } from '@/features/add-game/AddGameForm'
+import { useCatalogueBack } from '@/hooks/useCatalogueBack'
 
 export function AddGamePage() {
+  const goToCatalogue = useCatalogueBack()
+
   return (
     <AppShell header={<Header showSearch={false} />}>
       <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-        <Button asChild variant="ghost" className="mb-6 -ml-2">
-          <Link to="/">
-            <ArrowLeft className="h-4 w-4" />
-            Back to catalogue
-          </Link>
+        <Button
+          type="button"
+          variant="ghost"
+          className="mb-6 -ml-2"
+          onClick={goToCatalogue}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to catalogue
         </Button>
 
         <div className="mb-10 space-y-3">

@@ -7,6 +7,7 @@ import { GameMedia } from '@/components/video/GameMedia'
 import { LikeButton } from '@/components/likes/LikeButton'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+import { useCatalogueBack } from '@/hooks/useCatalogueBack'
 import { useGame } from '@/hooks/useGame'
 import { useLikesContext } from '@/context/LikesContext'
 import { useVisitorId } from '@/hooks/useVisitorId'
@@ -19,6 +20,7 @@ export function GameDetailPage() {
   const { game, loading, error, updateLocal } = useGame(id)
   const { isLiked, toggle } = useLikesContext()
   const visitorId = useVisitorId()
+  const goToCatalogue = useCatalogueBack()
   const [rulesLang, setRulesLang] = useState<RulesLang>('en')
 
   async function handleLike() {
@@ -45,11 +47,14 @@ export function GameDetailPage() {
   return (
     <AppShell header={<Header showSearch={false} />}>
       <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-        <Button asChild variant="ghost" className="mb-6 -ml-2">
-          <Link to="/">
-            <ArrowLeft className="h-4 w-4" />
-            Back to catalogue
-          </Link>
+        <Button
+          type="button"
+          variant="ghost"
+          className="mb-6 -ml-2"
+          onClick={goToCatalogue}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to catalogue
         </Button>
 
         {loading ? (
@@ -66,8 +71,8 @@ export function GameDetailPage() {
             <p className="mt-2 text-sm text-muted">
               {error ?? 'It may have been removed from the catalogue.'}
             </p>
-            <Button asChild className="mt-6">
-              <Link to="/">Return home</Link>
+            <Button type="button" className="mt-6" onClick={goToCatalogue}>
+              Return home
             </Button>
           </div>
         ) : null}

@@ -33,6 +33,8 @@ export function GameMedia({
           <YouTubeEmbed
             videoId={extractYouTubeId(game.videoUrl)!}
             title={game.title}
+            autoplay
+            muted
           />
         ) : (
           <YouTubeThumbnail url={game.videoUrl} title={game.title} />
@@ -48,6 +50,7 @@ export function GameMedia({
           src={src}
           controls={isDetail}
           autoPreview={!isDetail}
+          autoPlayMuted={isDetail}
         />
       ) : null}
 

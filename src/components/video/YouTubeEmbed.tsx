@@ -5,6 +5,7 @@ interface YouTubeEmbedProps {
   title: string
   className?: string
   autoplay?: boolean
+  muted?: boolean
 }
 
 export function YouTubeEmbed({
@@ -12,12 +13,14 @@ export function YouTubeEmbed({
   title,
   className,
   autoplay = false,
+  muted = false,
 }: YouTubeEmbedProps) {
   const params = new URLSearchParams({
     rel: '0',
     modestbranding: '1',
   })
   if (autoplay) params.set('autoplay', '1')
+  if (muted || autoplay) params.set('mute', '1')
 
   return (
     <iframe

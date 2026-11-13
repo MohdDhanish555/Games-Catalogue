@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/Header'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AddGameForm } from '@/features/add-game/AddGameForm'
+import { useCatalogueBack } from '@/hooks/useCatalogueBack'
 import { useGame } from '@/hooks/useGame'
 import { useVisitorId } from '@/hooks/useVisitorId'
 
@@ -12,6 +13,7 @@ export function EditGamePage() {
   const { id } = useParams()
   const { game, loading, error } = useGame(id)
   const visitorId = useVisitorId()
+  const goToCatalogue = useCatalogueBack()
 
   const canEdit =
     Boolean(game && visitorId && game.visitorId && game.visitorId === visitorId)
@@ -36,8 +38,8 @@ export function EditGamePage() {
         {!loading && (error || !game) ? (
           <div className="rounded-lg border border-line bg-surface px-6 py-16 text-center">
             <p className="font-display text-2xl text-ink">Game not found</p>
-            <Button asChild className="mt-6">
-              <Link to="/">Return home</Link>
+            <Button type="button" className="mt-6" onClick={goToCatalogue}>
+              Return home
             </Button>
           </div>
         ) : null}

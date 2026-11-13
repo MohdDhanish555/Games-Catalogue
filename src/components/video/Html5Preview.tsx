@@ -6,7 +6,10 @@ interface Html5PreviewProps {
   poster?: string
   className?: string
   controls?: boolean
+  /** Catalogue-style muted looping preview when in view. */
   autoPreview?: boolean
+  /** Detail-style muted autoplay once (works with controls). */
+  autoPlayMuted?: boolean
 }
 
 export function Html5Preview({
@@ -14,9 +17,11 @@ export function Html5Preview({
   poster,
   className,
   controls = false,
-  autoPreview = true,
+  autoPreview = false,
+  autoPlayMuted = false,
 }: Html5PreviewProps) {
-  const { ref } = useInViewVideo(autoPreview && !controls)
+  const shouldAutoplay = autoPreview || autoPlayMuted
+  const { ref } = useInViewVideo(shouldAutoplay)
 
   return (
     <video
@@ -24,10 +29,10 @@ export function Html5Preview({
       className={cn('h-full w-full object-cover', className)}
       src={src}
       poster={poster}
-      muted={autoPreview && !controls}
-      loop={autoPreview && !controls}
+      muted={shouldAutoplay}
+      loop={autoPreview}
       playsInline
-      preload="none"
+      preload={shouldAutoplay ? 'auto' : 'none'}
       controls={controls}
     />
   )
