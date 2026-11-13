@@ -1,6 +1,6 @@
 # Family Games Catalogue
 
-A video-first catalogue for sharing family games — browse previews, open details, contribute new games, and like favourites.
+A video-first catalogue for sharing family games - browse previews, open details, contribute new games, and like favourites.
 
 ## Stack
 
@@ -22,6 +22,6 @@ See [`supabase/README.md`](supabase/README.md). Copy `.env.example` to `.env` an
 
 ## Scripts
 
-- `npm run dev` — local development
-- `npm run build` — production build
-- `npm run preview` — preview production build
+- `npm run dev` - local development
+- `npm run build` - production build
+- `npm run preview` - preview production build
