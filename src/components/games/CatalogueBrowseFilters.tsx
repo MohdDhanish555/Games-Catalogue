@@ -1,5 +1,5 @@
 import {
-  AGE_GROUPS,
+  AGE_GROUP_CHOICES,
   PLAY_FORMATS,
   type AgeGroup,
   type BrowseMode,
@@ -66,7 +66,7 @@ export function CatalogueBrowseFilters({
           </p>
           <ChipRow
             ariaLabel="Filter by age group"
-            options={[...AGE_GROUPS]}
+            options={[...AGE_GROUP_CHOICES]}
             value={ageGroup}
             onChange={onAgeGroupChange}
           />

@@ -13,7 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { AGE_GROUPS, PLAY_FORMATS, type Game } from '@/types/game'
+import {
+  AGE_GROUP_CHOICES,
+  PLAY_FORMATS,
+  type AgeGroup,
+  type Game,
+} from '@/types/game'
 import { createGame, updateGame, usingRemoteData } from '@/lib/gamesApi'
 import { uploadGameVideo } from '@/lib/supabase/storage'
 import { parseVideoUrl } from '@/lib/video/parseVideoUrl'
@@ -143,7 +148,7 @@ export function AddGameForm({
       const payload = {
         title: values.title.trim(),
         description: values.description.trim(),
-        ageGroup: values.ageGroup as (typeof AGE_GROUPS)[number],
+        ageGroup: values.ageGroup as AgeGroup,
         playFormat: values.playFormat as (typeof PLAY_FORMATS)[number],
         playerCount: values.playerCount.trim(),
         duration: values.duration.trim(),
@@ -209,7 +214,10 @@ export function AddGameForm({
                 <SelectValue placeholder="Select age group" />
               </SelectTrigger>
               <SelectContent>
-                {AGE_GROUPS.map((ageGroup) => (
+                {(values.ageGroup === 'Under 15'
+                  ? ([...AGE_GROUP_CHOICES, 'Under 15'] as AgeGroup[])
+                  : AGE_GROUP_CHOICES
+                ).map((ageGroup) => (
                   <SelectItem key={ageGroup} value={ageGroup}>
                     {ageGroup}
                   </SelectItem>

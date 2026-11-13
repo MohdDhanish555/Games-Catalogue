@@ -8,6 +8,11 @@ export const AGE_GROUPS = [
 
 export type AgeGroup = (typeof AGE_GROUPS)[number]
 
+/** Age options shown in filters / add-edit form (Under 15 hidden for now). */
+export const AGE_GROUP_CHOICES = AGE_GROUPS.filter(
+  (group): group is Exclude<AgeGroup, 'Under 15'> => group !== 'Under 15',
+)
+
 export const PLAY_FORMATS = ['Individual', 'Group'] as const
 
 export type PlayFormat = (typeof PLAY_FORMATS)[number]
