@@ -35,7 +35,7 @@ export function GameCard({
           variant === 'wide' && 'md:aspect-[21/9]',
         )}
       >
-        <div className="h-full w-full transition-transform duration-300 group-hover:scale-[1.02]">
+        <div className="relative z-0 h-full w-full transition-transform duration-300 group-hover:scale-[1.02]">
           {hasVideo ? (
             <GameMedia game={game} mode="preview" />
           ) : (
@@ -49,6 +49,12 @@ export function GameCard({
             </div>
           )}
         </div>
+        {hasVideo ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[42%] bg-gradient-to-t from-black/55 via-black/20 to-transparent"
+          />
+        ) : null}
       </Link>
 
       <div
