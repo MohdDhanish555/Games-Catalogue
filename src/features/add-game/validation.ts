@@ -110,6 +110,96 @@ export function gameToFormValues(game: {
   }
 }
 
+function normalizeRuleLines(
+  value: unknown,
+): string[] {
+  if (value == null) return []
+  if (typeof value === 'string') {
+    return value
+      .split(/\n+/)
+      .map((line) => line.replace(/^[-•*]\s*/, '').trim())
+      .filter(Boolean)
+  }
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item).replace(/^[-•*]\s*/, '').trim())
+      .filter(Boolean)
+  }
+  return []
+}
+
+function toHyphenBlock(lines: string[]): string {
+  return lines.map((line) => `- ${line}`).join('\n')
+}
+
+/** Parse pasted game JSON into form field patches (video stays separate). */
+export function parseGameImportJson(
+  raw: string,
+): { ok: true; patch: Partial<AddGameFormValues> } | { ok: false; error: string } {
+  const trimmed = raw.trim()
+  if (!trimmed) return { ok: false, error: 'Paste a JSON object first.' }
+
+  let data: unknown
+  try {
+    data = JSON.parse(trimmed)
+  } catch {
+    return { ok: false, error: 'Invalid JSON — check commas and quotes.' }
+  }
+
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return { ok: false, error: 'JSON must be a single object.' }
+  }
+
+  const obj = data as Record<string, unknown>
+  const patch: Partial<AddGameFormValues> = {}
+
+  if (typeof obj.title === 'string') patch.title = obj.title.trim()
+  if (typeof obj.description === 'string') {
+    patch.description = obj.description.trim()
+  }
+  if (typeof obj.materials === 'string') patch.materials = obj.materials.trim()
+  if (typeof obj.playerCount === 'string') {
+    patch.playerCount = obj.playerCount.trim()
+  }
+  if (typeof obj.duration === 'string') patch.duration = obj.duration.trim()
+
+  if (typeof obj.ageGroup === 'string') {
+    const age = obj.ageGroup.trim()
+    if (!AGE_GROUPS.includes(age as AgeGroup)) {
+      return {
+        ok: false,
+        error: `ageGroup must be one of: ${AGE_GROUPS.join(', ')}.`,
+      }
+    }
+    patch.ageGroup = age as AgeGroup
+  }
+
+  if (typeof obj.playFormat === 'string') {
+    const format = obj.playFormat.trim()
+    if (!PLAY_FORMATS.includes(format as PlayFormat)) {
+      return {
+        ok: false,
+        error: `playFormat must be one of: ${PLAY_FORMATS.join(', ')}.`,
+      }
+    }
+    patch.playFormat = format as PlayFormat
+  }
+
+  const en = normalizeRuleLines(obj.instructionsEn)
+  const kn = normalizeRuleLines(obj.instructionsKn)
+  const safety = normalizeRuleLines(obj.safety)
+  const enWithSafety = [...en, ...safety]
+
+  if (enWithSafety.length > 0) patch.instructionsEn = toHyphenBlock(enWithSafety)
+  if (kn.length > 0) patch.instructionsKn = toHyphenBlock(kn)
+
+  if (Object.keys(patch).length === 0) {
+    return { ok: false, error: 'JSON had no recognized game fields.' }
+  }
+
+  return { ok: true, patch }
+}
+
 export function resolveVideoFields(values: AddGameFormValues): {
   videoType: VideoType | null
   videoUrl: string | null

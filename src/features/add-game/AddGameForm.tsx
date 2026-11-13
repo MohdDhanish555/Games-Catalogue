@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils'
 import {
   gameToFormValues,
   initialAddGameValues,
+  parseGameImportJson,
   resolveVideoFields,
   validateAddGameForm,
   type AddGameFormErrors,
@@ -49,6 +50,9 @@ export function AddGameForm({
   const [submitting, setSubmitting] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [formError, setFormError] = useState<string | null>(null)
+  const [importJson, setImportJson] = useState('')
+  const [importMessage, setImportMessage] = useState<string | null>(null)
+  const [importError, setImportError] = useState<string | null>(null)
 
   const hasExistingUpload =
     initialGame?.videoType === 'upload' &&
@@ -80,6 +84,19 @@ export function AddGameForm({
       file: nextMode === 'upload' ? prev.file : null,
     }))
     setUploadProgress(0)
+  }
+
+  function applyImportJson() {
+    setImportMessage(null)
+    setImportError(null)
+    const result = parseGameImportJson(importJson)
+    if (!result.ok) {
+      setImportError(result.error)
+      return
+    }
+    setValues((prev) => ({ ...prev, ...result.patch }))
+    setErrors({})
+    setImportMessage('Fields filled from JSON. Upload a video above if needed, then submit.')
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -413,6 +430,43 @@ export function AddGameForm({
         <p className="rounded-md border border-like/30 bg-like/5 px-4 py-3 text-sm text-like">
           {formError}
         </p>
+      ) : null}
+
+      {!isEdit ? (
+        <details className="rounded-md border border-dashed border-line/80 bg-transparent">
+          <summary className="cursor-pointer select-none px-3 py-2 text-xs text-muted/80 hover:text-muted">
+            Import JSON
+          </summary>
+          <div className="space-y-3 border-t border-line/60 px-3 py-3">
+            <p className="text-xs leading-relaxed text-muted/70">
+              Paste game JSON to fill the fields above. Video is still chosen in
+              the Video section.
+            </p>
+            <Textarea
+              value={importJson}
+              onChange={(e) => setImportJson(e.target.value)}
+              placeholder='{"title":"…","ageGroup":"All ages",…}'
+              className="min-h-[120px] font-mono text-xs"
+              spellCheck={false}
+            />
+            {importError ? (
+              <p className="text-xs text-like">{importError}</p>
+            ) : null}
+            {importMessage ? (
+              <p className="text-xs text-muted">{importMessage}</p>
+            ) : null}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="text-muted"
+              onClick={applyImportJson}
+              disabled={submitting}
+            >
+              Apply JSON
+            </Button>
+          </div>
+        </details>
       ) : null}
 
       <div className="flex flex-col-reverse gap-3 border-t border-line pt-6 sm:flex-row sm:justify-end">
